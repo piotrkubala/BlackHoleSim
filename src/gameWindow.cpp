@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cmath>
 
-GameWindow::GameWindow(int x, int y, bool fullScreen): window(sf::VideoMode(x, y), "Black Hole Simulation", fullScreen ? sf::Style::Fullscreen : sf::Style::Resize | sf::Style::Close)
+GameWindow::GameWindow(int x, int y, bool fullScreen): window(sf::VideoMode(x, y), "Black Hole Simulation", fullScreen ? sf::Style::Fullscreen : sf::Style::Resize | sf::Style::Close), mainObserver(sf::Vector3f(4.0, 0.0, 0.0))
 {
     initialize();
 }
@@ -51,14 +51,40 @@ void GameWindow::events()
     }
 }
 
+void observerMovement()
+{
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    {
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    {
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    {
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+    {
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+    {
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+    {
+    }
+}
+
 void GameWindow::loop()
 {
     while (window.isOpen())
     {
         events();
 
-        mainBlackHoleFragmentShader.setUniform("u_time", static_cast <float> (timeSinceOpen.getElapsedTime().asMilliseconds()) * 0.001f);
-        mainBlackHoleFragmentShader.setUniform("u_polozeniePocz", sf::Vector3f(0.0, 0.0, 4.3));
+        float timeMiliS = timeSinceOpen.getElapsedTime().asMilliseconds() * 0.001f;
+
+        mainBlackHoleFragmentShader.setUniform("u_time", timeMiliS);
+        mainBlackHoleFragmentShader.setUniform("u_polozeniePocz", sf::Vector3f(0.0, 0.0, 4.3 + 1.0));
         mainBlackHoleFragmentShader.setUniform("u_alfaParam", 3.5f);
 
         mainBlackHoleFragmentShader.setUniform("u_rotationVector", sf::Vector3f(1.0, 1.0, 0.0));

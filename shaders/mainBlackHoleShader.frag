@@ -79,6 +79,11 @@ float dro_dfi(vec3 polozenie, vec3 kier, float odl)
     return -1.0 / (odl * odl * odl) * dot(-polozenie, kier);
 }
 
+float policzDobreDfi(float ro)
+{
+    return u_maxDfi;
+}
+
 vec3 znajdzWektorKierWNiesk(vec3 polozenie, vec3 kier)
 {
     float r = length(polozenie);
@@ -95,32 +100,35 @@ vec3 znajdzWektorKierWNiesk(vec3 polozenie, vec3 kier)
             return kier;
     }
 
-    float ro = 1.0 / r, fi = 0.0, pochRo = -dro_dfi(polozenie, kier, r);
+    float ro = 1.0 / r, fi = 0.0, pochRo = -dro_dfi(polozenie, kier, r), dfi;
 
     for(int i = 0; i < MAX_IT; i++)
     {
         float d2ro_dfi2 = (u_alfaParam * ro - 1.0) * ro;
 
-        float dro = -(pochRo + 0.5 * d2ro_dfi2 * u_maxDfi) * u_maxDfi;
-        pochRo -= d2ro_dfi2 * u_maxDfi;
+        dfi = policzDobreDfi(ro);
+
+        float dro = -(pochRo + 0.5 * d2ro_dfi2 * dfi) * dfi;
+        pochRo -= d2ro_dfi2 * dfi;
 
         if((ro + dro) * ro < 0.0 || 1.0 >= 1.0e+3 * ro)
             break;
         
         ro += dro;
-        fi += u_maxDfi;
+        fi += dfi;
 
         if(1.0 <= 2.0 * u_alfaParam / 3.0 * ro && 1.0 < ro * r)
             return vec3(0.0);
     }
 
+    dfi = policzDobreDfi(ro) * 0.01;
     float r_nowe = 1.0 / ro;
     float pochR = -r_nowe * r_nowe * pochRo;
 
     if(pochR == 0.0)
         return vec3(0.0);
     
-    vec3 polNowe1 = (bazaX * cos(fi) + bazaY * sin(fi)) * r_nowe, polNowe2 = (bazaX * cos(fi + u_maxDfi) + bazaY * sin(fi + u_maxDfi)) * (r_nowe + pochR * u_maxDfi);
+    vec3 polNowe1 = (bazaX * cos(fi) + bazaY * sin(fi)) * r_nowe, polNowe2 = (bazaX * cos(fi + dfi) + bazaY * sin(fi + dfi)) * (r_nowe + pochR * dfi);
     vec3 kierNowy = polNowe2 - polNowe1;
 
     return kierNowy / length(kierNowy);
