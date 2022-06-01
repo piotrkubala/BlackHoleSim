@@ -35,6 +35,7 @@ void GameWindow::initialize()
     displayShaderRectangle.setSize(static_cast <sf::Vector2f> (window.getSize()));
     mainBlackHoleFragmentShader.setUniform("u_background", backgroundTexture);
     mainBlackHoleFragmentShader.setUniform("u_angle", 50.0f);
+    mainBlackHoleFragmentShader.setUniform("u_maxDfi", 0.001f);
     rescale();
 }
 
@@ -58,7 +59,8 @@ void GameWindow::loop()
         events();
 
         mainBlackHoleFragmentShader.setUniform("u_time", static_cast <float> (timeSinceOpen.getElapsedTime().asMilliseconds()) * 0.001f);
-        //mainBlackHoleFragmentShader.setUniform("u_angle", 20.0f * sinf(timeSinceOpen.getElapsedTime().asMilliseconds() * 0.001f) + 45.0f);
+        mainBlackHoleFragmentShader.setUniform("u_polozeniePocz", sf::Vector3f(4.0, 0.0, 0.0));
+        mainBlackHoleFragmentShader.setUniform("u_alfaParam", 1.0f);
 
         window.clear(sf::Color(255, 255, 255, 255));
         window.draw(displayShaderRectangle, &mainBlackHoleFragmentShader);

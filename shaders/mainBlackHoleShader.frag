@@ -11,6 +11,10 @@ uniform vec2 u_resolution;
 uniform sampler2D u_background;
 
 uniform float u_angle;
+uniform float u_maxDfi;
+uniform float u_alfaParam;
+
+uniform vec3 u_polozeniePocz;
 
 uniform float u_time;
 
@@ -24,10 +28,8 @@ vec3 wektorKierunkuSwiatla(vec2 polozenie)
 
 vec2 znajdzPunktTekstury(vec3 kierunek)
 {
-    //return vec2(atan(kierunek.z, kierunek.x) * ONE_2PI + 0.5, kierunek.y * 0.5 + 0.5);
-
     float dlugosc = atan2(kierunek.z, kierunek.x) * ONE_2PI + 0.5;
-    float szerokosc = (asin(kierunek.y / length(kierunek)) * ONE_PI  + 0.5);
+    float szerokosc = (asin(kierunek.y) * ONE_PI  + 0.5);
 
     return vec2(dlugosc, szerokosc);
 }
@@ -48,6 +50,13 @@ vec3 obrotX(float x, vec3 v)
 {
     float c = cos(x), s = sin(x);
     return vec3(v.x, c * v.y + s * v.z, -s * v.y + c * v.z);
+}
+
+float dro_dfi(vec3 polozenie, vec3 kier)
+{
+    vec3 r = polozenie / length(polozenie);
+
+    return -1.0 / dot(r, r) * dot(-r, kier);
 }
 
 void main()
