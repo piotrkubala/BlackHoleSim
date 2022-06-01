@@ -81,3 +81,18 @@ void Observer::setPosition(const sf::Vector3f &pos_)
 {
     position = pos_;
 }
+
+float Observer::getSpeed()const
+{
+    return speed;
+}
+
+void Observer::setSpeed(const float &speed_)
+{
+    speed = speed_;
+}
+
+void Observer::move(const sf::Vector3f &dirs)
+{
+    position += (rotationX * dirs.x + rotationY * dirs.y + rotationZ * dirs.z) * speed;
+}

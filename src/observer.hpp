@@ -21,13 +21,18 @@ public:
     void rotateAround(const float &angle, const sf::Vector3f &axis);
     void translate(const sf::Vector3f &v);
 
+    void move(const sf::Vector3f &dirs);
+
     sf::Vector3f getRotationX()const;
     sf::Vector3f getRotationY()const;
     sf::Vector3f getRotationZ()const;
 
     sf::Vector3f getPosition()const;
 
+    float getSpeed()const;
+
     void setPosition(const sf::Vector3f &pos_);
+    void setSpeed(const float &speed_);
 };
 
 #endif

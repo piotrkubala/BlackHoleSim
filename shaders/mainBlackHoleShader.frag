@@ -6,7 +6,7 @@ precision mediump float;
 #define ONE_2PI 0.15915494309189535
 #define ONE_PI 0.3183098861837907
 
-#define MAX_IT 10000
+#define MAX_IT 100000
 
 uniform vec2 u_resolution;
 
@@ -18,15 +18,18 @@ uniform float u_alfaParam;
 
 uniform vec3 u_polozeniePocz;
 
-uniform vec3 u_rotationVector;
-uniform float u_rotationAngle;
+uniform vec3 u_baseX;
+uniform vec3 u_baseY;
+uniform vec3 u_baseZ;
 
 uniform float u_time;
 
 vec3 wektorKierunkuSwiatla(vec2 polozenie)
 {
     float tangens = 1.0 / tan(u_angle * PI / 180.0);
-    vec3 v = vec3(polozenie, 0.0) - vec3(0.0, 0.0, -tangens);
+    vec3 v = vec3(polozenie, 0.0) - vec3(0.0, 0.0, tangens);
+
+    v = v.x * u_baseX + v.y * u_baseY + v.z * u_baseZ;
 
     return v / length(v);
 }
@@ -81,7 +84,7 @@ float dro_dfi(vec3 polozenie, vec3 kier, float odl)
 
 float policzDobreDfi(float ro)
 {
-    return u_maxDfi;
+    return u_maxDfi * (1.0 - 0.5 / (1.0 + ro * ro));
 }
 
 vec3 znajdzWektorKierWNiesk(vec3 polozenie, vec3 kier)
@@ -100,7 +103,7 @@ vec3 znajdzWektorKierWNiesk(vec3 polozenie, vec3 kier)
             return kier;
     }
 
-    float ro = 1.0 / r, fi = 0.0, pochRo = -dro_dfi(polozenie, kier, r), dfi;
+    float ro = 1.0 / r, fi = 0.0, pochRo = dro_dfi(polozenie, kier, r), dfi;
 
     for(int i = 0; i < MAX_IT; i++)
     {
@@ -108,20 +111,29 @@ vec3 znajdzWektorKierWNiesk(vec3 polozenie, vec3 kier)
 
         dfi = policzDobreDfi(ro);
 
-        float dro = -(pochRo + 0.5 * d2ro_dfi2 * dfi) * dfi;
-        pochRo -= d2ro_dfi2 * dfi;
+        float dro = (pochRo + 0.5 * d2ro_dfi2 * dfi) * dfi;
 
-        if((ro + dro) * ro < 0.0 || 1.0 >= 1.0e+3 * ro)
+        if(ro + dro <= 1.0e-4)
             break;
-        
+
+        if((ro + dro) * ro < 0.0)
+            break;
+
+        pochRo += d2ro_dfi2 * dfi;
         ro += dro;
         fi += dfi;
 
         if(1.0 <= 2.0 * u_alfaParam / 3.0 * ro && 1.0 < ro * r)
             return vec3(0.0);
+
+        if(1.0 >= 1.0e6 * ro)
+            break;
     }
 
-    dfi = policzDobreDfi(ro) * 0.01;
+    if(1.0 <= 2.0 * u_alfaParam / 3.0 * ro && 1.0 < ro * r)
+        return vec3(0.0);
+
+    dfi = u_maxDfi;
     float r_nowe = 1.0 / ro;
     float pochR = -r_nowe * r_nowe * pochRo;
 
@@ -143,7 +155,7 @@ void main()
     st -= 0.5;
     st.x *= wspolczynnik;
 
-    vec3 kierSwiatla = obrotWokolWekt(u_rotationAngle, u_rotationVector / length(u_rotationVector), wektorKierunkuSwiatla(st));
+    vec3 kierSwiatla = wektorKierunkuSwiatla(st);
 
     kierSwiatla = znajdzWektorKierWNiesk(u_polozeniePocz, kierSwiatla);
 

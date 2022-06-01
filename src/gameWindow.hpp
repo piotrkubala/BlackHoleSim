@@ -15,6 +15,7 @@ class GameWindow
     Observer mainObserver;
 
     sf::Clock timeSinceOpen;
+    sf::Clock timeSinceLastFrame;
 
     void rescale();
     void events();
