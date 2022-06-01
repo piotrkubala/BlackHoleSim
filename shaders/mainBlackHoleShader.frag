@@ -2,28 +2,34 @@
 precision mediump float;
 #endif
 
-#define PI 3.141592
+#define PI 3.141592653589793
 #define ONE_2PI 0.15915494309189535
+#define ONE_PI 0.3183098861837907
 
 uniform vec2 u_resolution;
 
 uniform sampler2D u_background;
 
-uniform float u_h_distance;
-uniform float u_scale;
+uniform float u_angle;
 
 uniform float u_time;
 
 vec3 wektorKierunkuSwiatla(vec2 polozenie)
 {
-    vec3 v = vec3(polozenie, 0.0) * u_scale - vec3(0.0, 0.0, -u_h_distance);
+    float tangens = 1.0 / tan(u_angle * PI / 180.0);
+    vec3 v = vec3(polozenie, 0.0) - vec3(0.0, 0.0, -tangens);
 
     return v / length(v);
 }
 
 vec2 znajdzPunktTekstury(vec3 kierunek)
 {
-    return vec2(atan(kierunek.y, kierunek.x) * ONE_2PI + 0.5, kierunek.z * 0.5 + 0.5);
+    //return vec2(atan(kierunek.z, kierunek.x) * ONE_2PI + 0.5, kierunek.y * 0.5 + 0.5);
+
+    float dlugosc = atan2(kierunek.z, kierunek.x) * ONE_2PI + 0.5;
+    float szerokosc = (asin(kierunek.y / length(kierunek)) * ONE_PI  + 0.5);
+
+    return vec2(dlugosc, szerokosc);
 }
 
 vec3 obrotZ(float x, vec3 v)

@@ -1,6 +1,7 @@
 #include "gameWindow.hpp"
 
 #include <iostream>
+#include <cmath>
 
 GameWindow::GameWindow(int x, int y, bool fullScreen): window(sf::VideoMode(x, y), "Schwarzschild Black Hole Simulation", fullScreen ? sf::Style::Fullscreen : sf::Style::Resize | sf::Style::Close)
 {
@@ -19,9 +20,6 @@ void GameWindow::rescale()
     displayShaderRectangle.setPosition(sf::Vector2f(0.0f, 0.0f));
 
     mainBlackHoleFragmentShader.setUniform("u_resolution", rozmiary);
-    mainBlackHoleFragmentShader.setUniform("u_background", backgroundTexture);
-    mainBlackHoleFragmentShader.setUniform("u_h_distance", 20.0f);
-    mainBlackHoleFragmentShader.setUniform("u_scale", 40.0f);
 }
 
 void GameWindow::initialize()
@@ -35,6 +33,8 @@ void GameWindow::initialize()
     window.setFramerateLimit(60);
     timeSinceOpen.restart();
     displayShaderRectangle.setSize(static_cast <sf::Vector2f> (window.getSize()));
+    mainBlackHoleFragmentShader.setUniform("u_background", backgroundTexture);
+    mainBlackHoleFragmentShader.setUniform("u_angle", 50.0f);
     rescale();
 }
 
@@ -58,6 +58,7 @@ void GameWindow::loop()
         events();
 
         mainBlackHoleFragmentShader.setUniform("u_time", static_cast <float> (timeSinceOpen.getElapsedTime().asMilliseconds()) * 0.001f);
+        //mainBlackHoleFragmentShader.setUniform("u_angle", 20.0f * sinf(timeSinceOpen.getElapsedTime().asMilliseconds() * 0.001f) + 45.0f);
 
         window.clear(sf::Color(255, 255, 255, 255));
         window.draw(displayShaderRectangle, &mainBlackHoleFragmentShader);
