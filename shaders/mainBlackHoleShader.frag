@@ -6,6 +6,8 @@ precision mediump float;
 #define ONE_2PI 0.15915494309189535
 #define ONE_PI 0.3183098861837907
 
+#define MAX_IT 10000
+
 uniform vec2 u_resolution;
 
 uniform sampler2D u_background;
@@ -15,6 +17,9 @@ uniform float u_maxDfi;
 uniform float u_alfaParam;
 
 uniform vec3 u_polozeniePocz;
+
+uniform vec3 u_rotationVector;
+uniform float u_rotationAngle;
 
 uniform float u_time;
 
@@ -52,11 +57,73 @@ vec3 obrotX(float x, vec3 v)
     return vec3(v.x, c * v.y + s * v.z, -s * v.y + c * v.z);
 }
 
-float dro_dfi(vec3 polozenie, vec3 kier)
+// os musi miec dlugosc 1
+vec3 obrotWokolWekt(float angle, vec3 os, vec3 v)
 {
-    vec3 r = polozenie / length(polozenie);
+    vec3 rownolegly = dot(os, v) * os;
+    vec3 prost1 = v - rownolegly;
 
-    return -1.0 / dot(r, r) * dot(-r, kier);
+    float dlugoscProst = length(prost1);
+
+    if(dlugoscProst == 0.0)
+        return v;
+
+    prost1 /= dlugoscProst;
+    vec3 prost2 = cross(os, prost1);
+
+    return rownolegly + (prost1 * cos(angle) + prost2 * sin(angle)) * dlugoscProst;
+}
+
+float dro_dfi(vec3 polozenie, vec3 kier, float odl)
+{
+    return -1.0 / (odl * odl * odl) * dot(-polozenie, kier);
+}
+
+vec3 znajdzWektorKierWNiesk(vec3 polozenie, vec3 kier)
+{
+    float r = length(polozenie);
+    vec3 bazaX = polozenie / r, bazaY;
+    bazaY = kier - dot(bazaX, kier) * bazaX;
+
+    float dlBazaY = length(bazaY);
+
+    if(dlBazaY == 0.0)
+    {
+        if(dot(polozenie, kier) <= 0.0)
+            return vec3(0.0);
+        else
+            return kier;
+    }
+
+    float ro = 1.0 / r, fi = 0.0, pochRo = -dro_dfi(polozenie, kier, r);
+
+    for(int i = 0; i < MAX_IT; i++)
+    {
+        float d2ro_dfi2 = (u_alfaParam * ro - 1.0) * ro;
+
+        float dro = -(pochRo + 0.5 * d2ro_dfi2 * u_maxDfi) * u_maxDfi;
+        pochRo -= d2ro_dfi2 * u_maxDfi;
+
+        if((ro + dro) * ro < 0.0 || 1.0 >= 1.0e+3 * ro)
+            break;
+        
+        ro += dro;
+        fi += u_maxDfi;
+
+        if(1.0 <= 2.0 * u_alfaParam / 3.0 * ro && 1.0 < ro * r)
+            return vec3(0.0);
+    }
+
+    float r_nowe = 1.0 / ro;
+    float pochR = -r_nowe * r_nowe * pochRo;
+
+    if(pochR == 0.0)
+        return vec3(0.0);
+    
+    vec3 polNowe1 = (bazaX * cos(fi) + bazaY * sin(fi)) * r_nowe, polNowe2 = (bazaX * cos(fi + u_maxDfi) + bazaY * sin(fi + u_maxDfi)) * (r_nowe + pochR * u_maxDfi);
+    vec3 kierNowy = polNowe2 - polNowe1;
+
+    return kierNowy / length(kierNowy);
 }
 
 void main()
@@ -68,7 +135,14 @@ void main()
     st -= 0.5;
     st.x *= wspolczynnik;
 
-    vec3 color = texture(u_background, znajdzPunktTekstury(obrotY(u_time * 1.4213 * 0.1, obrotX(u_time * 0.1, wektorKierunkuSwiatla(st)))));
+    vec3 kierSwiatla = obrotWokolWekt(u_rotationAngle, u_rotationVector / length(u_rotationVector), wektorKierunkuSwiatla(st));
+
+    kierSwiatla = znajdzWektorKierWNiesk(u_polozeniePocz, kierSwiatla);
+
+    vec3 color = vec3(0.0);
+    
+    if(kierSwiatla != vec3(0.0))
+        color = texture(u_background, znajdzPunktTekstury(kierSwiatla));
 
     gl_FragColor = vec4(color,1.0);
 }
