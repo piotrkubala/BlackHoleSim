@@ -79,7 +79,11 @@ vec3 obrotWokolWekt(float angle, vec3 os, vec3 v)
 
 float dro_dfi(vec3 polozenie, vec3 kier, float odl)
 {
-    return -1.0 / (odl * odl * odl) * dot(-polozenie, kier);
+    vec3 bazaR = -polozenie / odl;
+    float rown = dot(kier, bazaR);
+    float prost = length(kier - rown * bazaR);
+
+    return -rown / (odl * prost);
 }
 
 float policzDobreDfi(float ro)

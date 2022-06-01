@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cmath>
 
-GameWindow::GameWindow(int x, int y, bool fullScreen): window(sf::VideoMode(x, y), "Black Hole Simulation", fullScreen ? sf::Style::Fullscreen : sf::Style::Resize | sf::Style::Close), mainObserver(sf::Vector3f(5, 0.0, 0.0), 0.3)
+GameWindow::GameWindow(int x, int y, bool fullScreen): window(sf::VideoMode(x, y), "Black Hole Simulation", fullScreen ? sf::Style::Fullscreen : sf::Style::Resize | sf::Style::Close), mainObserver(sf::Vector3f(10, 0.0, 0.0), 5.0)
 {
     initialize();
 }
@@ -121,7 +121,5 @@ void GameWindow::loop()
         window.draw(displayShaderRectangle, &mainBlackHoleFragmentShader);
         timeSinceLastFrame.restart();
         window.display();
-
-        std::cout << mainObserver.getPosition().x << ' ' << mainObserver.getPosition().y << ' ' << mainObserver.getPosition().z << ' ' << '\n';
     }
 }
