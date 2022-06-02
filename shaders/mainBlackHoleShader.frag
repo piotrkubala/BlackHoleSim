@@ -36,7 +36,7 @@ vec3 wektorKierunkuSwiatla(vec2 polozenie)
 
 vec2 znajdzPunktTekstury(vec3 kierunek)
 {
-    float dlugosc = atan2(kierunek.z, kierunek.x) * ONE_2PI + 0.5;
+    float dlugosc = atan(kierunek.z, kierunek.x) * ONE_2PI + 0.5;
     float szerokosc = (asin(kierunek.y) * ONE_PI  + 0.5);
 
     return vec2(dlugosc, szerokosc);
@@ -163,10 +163,10 @@ void main()
 
     kierSwiatla = znajdzWektorKierWNiesk(u_polozeniePocz, kierSwiatla);
 
-    vec3 color = vec3(0.0);
+    vec4 color = vec4(0.0);
     
     if(kierSwiatla != vec3(0.0))
-        color = texture(u_background, znajdzPunktTekstury(kierSwiatla));
+        color = texture2D(u_background, znajdzPunktTekstury(kierSwiatla));
 
-    gl_FragColor = vec4(color,1.0);
+    gl_FragColor = color;
 }
